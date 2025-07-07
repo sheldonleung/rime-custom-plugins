@@ -1,3 +1,5 @@
+#include <rime/common.h>
+#include <rime/config.h>
 #include <rime/context.h>
 #include <rime/engine.h>
 #include <rime/key_event.h>
@@ -78,35 +80,20 @@ void clean_userdb_folders() {
  */
 std::vector<fs::path> get_userdb_files() {
   std::vector<fs::path> result;
-  std::string dir = rime_get_api()->get_user_data_dir();
+
+  // rime_get_api()->get_user_id() 在小狼毫上获取的结果为unknown
+  // std::string installation_id = rime_get_api()->get_user_id()
+  auto dir = path(rime_get_api()->get_user_data_dir());
   if (!fs::is_directory(dir) || !fs::exists(dir)) return result;
-  std::string user_id;
-#if defined(_WIN32) || defined(_WIN64)
-  std::string inst_file = dir + "\\installation.yaml";
-  std::string sync_dir = dir + "\\sync\\";
-#else
-  std::string inst_file = dir + "/installation.yaml";
-  std::string sync_dir = dir + "/sync/";
-#endif
-  // rime_get_api()->get_user_id() 在小狼毫上获取的结果为unknow
-  // 从 installation.yaml 中获取 user_id
-  if (!fs::is_regular_file(inst_file)) return result;
-  std::ifstream in(inst_file);
-  if (!in.is_open()) return result;
-  std::string line;
-  line.reserve(256);
-  std::string prefix = "installation_id: \"";
-  while (std::getline(in, line)) {
-    if (line.empty()) continue;
-    if (line.length() > prefix.length() && line.substr(0, prefix.length()) == prefix) {
-      user_id = line.substr(prefix.length(), line.length() - prefix.length() - 1);
-      break;
-    }
-    line.clear();
-  }
-  in.close();
-  if (user_id.empty()) return result;
-  sync_dir = sync_dir + user_id;
+  auto inst_file = dir / "installation.yaml";
+  auto sync_dir = dir / "sync";
+  Config config;
+  std::string installation_id;
+  config.LoadFromFile(inst_file);
+  config.GetString("installation_id", &installation_id);
+
+  if (installation_id.empty()) return result;
+  sync_dir = sync_dir / installation_id;
 
   for (const auto& entry : fs::directory_iterator(sync_dir)) {
     try {
