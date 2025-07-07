@@ -6,13 +6,13 @@
 
 namespace rime {
 
-static void rime_custom_plugins_initialize() {
+static void rime_custom_initialize() {
   Registry& r = Registry::instance();
   r.Register("userdb_sync_delete", new Component<UserdbSyncDelete>);
 }
 
-static void rime_custom_plugins_finalize() {}
+static void rime_custom_finalize() {}
 
-RIME_REGISTER_MODULE(custom_plugins)
+RIME_REGISTER_MODULE(custom)
 
 }  // namespace rime

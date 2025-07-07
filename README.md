@@ -14,7 +14,7 @@ cd librime/plugins
 
 git clone https://github.com/sheldonleung/rime-custom-plugins.git
 
-重命名 rime-custom-plugins 为 custom-plugins
+重命名 rime-custom-plugins 为 custom
 ```
 
 2. 编译：
